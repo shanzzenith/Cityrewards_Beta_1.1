@@ -1,332 +1,195 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { MOCK_USER, MOCK_NEARBY_STORES, MOCK_REWARDS } from '../../constants/mockData';
+export const MOCK_USER = {
+  id: 'user_001',
+  name: 'Sam',
+  fullName: 'Sam Rivera',
+  email: 'sam@example.com',
+  cityRewardsBalance: 60,
+  cityActionPoints: 60,
+  lifetimeRewardsEarned: 180,
+  lifetimeRewardsSpent: 120,
+  level: 'Green Level',
+  waterSavedLitres: 50,
+  wasteAvoidedKg: 1.5,
+  co2PreventedKg: 11,
+};
 
-function PointsRing({ points, size = 130 }: { points: number; size?: number }) {
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(points / 200, 1);
-  const strokeDashoffset = circumference - progress * circumference;
+export const MOCK_ACTIVITY = [
+  {
+    id: 'tx_001',
+    description: 'Reusable Cup Bonus',
+    sourceType: 'scan',
+    amount: 50,
+    entryType: 'credit' as const,
+    runningBalance: 60,
+    createdAt: '2026-05-13T09:30:00Z',
+    cafeName: 'Aurora Coffee',
+  },
+  {
+    id: 'tx_002',
+    description: 'Latte',
+    sourceType: 'redemption',
+    amount: -40,
+    entryType: 'debit' as const,
+    runningBalance: 10,
+    createdAt: '2026-05-12T14:20:00Z',
+    cafeName: 'Green Bean Cafe',
+  },
+  {
+    id: 'tx_003',
+    description: 'Mocha',
+    sourceType: 'redemption',
+    amount: -40,
+    entryType: 'debit' as const,
+    runningBalance: 50,
+    createdAt: '2026-05-12T11:10:00Z',
+    cafeName: 'Riverway Coffee',
+  },
+  {
+    id: 'tx_004',
+    description: 'Push Notification Bonus',
+    sourceType: 'push_opt_in',
+    amount: 20,
+    entryType: 'credit' as const,
+    runningBalance: 90,
+    createdAt: '2026-05-10T08:00:00Z',
+    cafeName: null,
+  },
+  {
+    id: 'tx_005',
+    description: 'Phone Verification Bonus',
+    sourceType: 'phone_bonus',
+    amount: 20,
+    entryType: 'credit' as const,
+    runningBalance: 70,
+    createdAt: '2026-05-09T16:00:00Z',
+    cafeName: null,
+  },
+  {
+    id: 'tx_006',
+    description: 'Welcome Bonus',
+    sourceType: 'welcome_bonus',
+    amount: 100,
+    entryType: 'credit' as const,
+    runningBalance: 100,
+    createdAt: '2026-05-09T15:55:00Z',
+    cafeName: null,
+  },
+];
 
-  return (
-    <View style={{ width: size, height: size, position: 'relative' }}>
-      <Svg width={size} height={size}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="#E8F3F0"
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="#1A5F4F"
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </Svg>
+export const MOCK_NEARBY_STORES = [
+  {
+    id: 'store_001',
+    name: 'Aurora Coffee',
+    distance: '0.4 km',
+    distanceValue: 0.4,
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80',
+    address: '12 King St W',
+    pointsPerVisit: 50,
+    lat: 43.6486,
+    lng: -79.3816,
+    isOpen: true,
+    openUntil: '8:00 PM',
+  },
+  {
+    id: 'store_002',
+    name: 'Green Bean Cafe',
+    distance: '0.7 km',
+    distanceValue: 0.7,
+    image: 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&q=80',
+    address: '45 Queen St E',
+    pointsPerVisit: 50,
+    lat: 43.651,
+    lng: -79.378,
+    isOpen: true,
+    openUntil: '7:00 PM',
+  },
+  {
+    id: 'store_003',
+    name: 'Riverway Coffee',
+    distance: '1.1 km',
+    distanceValue: 1.1,
+    image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=80',
+    address: '88 Spadina Ave',
+    pointsPerVisit: 50,
+    lat: 43.645,
+    lng: -79.395,
+    isOpen: false,
+    openUntil: '6:00 PM',
+  },
+  {
+    id: 'store_004',
+    name: 'Civic Coffee',
+    distance: '1.3 km',
+    distanceValue: 1.3,
+    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80',
+    address: '200 Front St W',
+    pointsPerVisit: 50,
+    lat: 43.6445,
+    lng: -79.382,
+    isOpen: true,
+    openUntil: '9:00 PM',
+  },
+];
 
-      <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text style={{ fontSize: 28, fontWeight: '700', color: '#1A1A1A' }}>
-          {points}
-        </Text>
-        <Text style={{ fontSize: 12, color: '#4A4A4A', fontWeight: '500' }}>
-          City Rewards
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function StatBadge({
-  icon,
-  value,
-  label,
-}: {
-  icon: string;
-  value: string;
-  label: string;
-}) {
-  return (
-    <View
-      className="bg-white rounded-2xl px-3 py-2.5 mb-2"
-      style={{ shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 }}
-    >
-      <View className="flex-row items-center">
-        <Text className="text-lg mr-1.5">{icon}</Text>
-        <View>
-          <Text className="text-text-dark font-bold text-sm">{value}</Text>
-          <Text className="text-text-soft text-xs">{label}</Text>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-function StoreCard({
-  store,
-  onPress,
-}: {
-  store: typeof MOCK_NEARBY_STORES[0];
-  onPress: () => void;
-}) {
-  const imageSource =
-    typeof store.image === 'string' && store.image.length > 0
-      ? { uri: store.image }
-      : { uri: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&q=80' };
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className="mr-3"
-      activeOpacity={0.85}
-      style={{ width: 130 }}
-    >
-      <View className="rounded-2xl overflow-hidden" style={{ height: 100 }}>
-        <Image source={imageSource} className="w-full h-full" resizeMode="cover" />
-
-        <View
-          className="absolute top-2 right-2 bg-white w-7 h-7 rounded-full items-center justify-center"
-          style={{ shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 4, elevation: 2 }}
-        >
-          <Text style={{ fontSize: 14 }}>☕</Text>
-        </View>
-
-        {!store.isOpen && (
-          <View className="absolute inset-0 bg-black/40 items-center justify-center">
-            <Text className="text-white text-xs font-semibold">Closed</Text>
-          </View>
-        )}
-      </View>
-
-      <Text className="text-text-dark font-semibold text-sm mt-1.5" numberOfLines={1}>
-        {store.name}
-      </Text>
-
-      <View className="flex-row items-center mt-0.5">
-        <Ionicons name="location-outline" size={11} color="#888880" />
-        <Text className="text-text-soft text-xs ml-0.5">{store.distance}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function MapView() {
-  return (
-    <View
-      className="mx-4 rounded-2xl overflow-hidden"
-      style={{ height: 160, backgroundColor: '#E8EFE8' }}
-    >
-      <View className="absolute inset-0 bg-green-50 items-center justify-center">
-        <View className="absolute inset-0" style={{ opacity: 0.3 }}>
-          {[0.3, 0.5, 0.7].map((pos) => (
-            <View
-              key={`h-${pos}`}
-              className="absolute left-0 right-0 h-px bg-gray-400"
-              style={{ top: `${pos * 100}%` }}
-            />
-          ))}
-          {[0.25, 0.5, 0.75].map((pos) => (
-            <View
-              key={`v-${pos}`}
-              className="absolute top-0 bottom-0 w-px bg-gray-400"
-              style={{ left: `${pos * 100}%` }}
-            />
-          ))}
-        </View>
-
-        <View className="absolute" style={{ top: '30%', left: '30%' }}>
-          <MapPin />
-        </View>
-        <View className="absolute" style={{ top: '55%', left: '55%' }}>
-          <MapPin />
-        </View>
-        <View className="absolute" style={{ top: '40%', left: '68%' }}>
-          <ShopPin />
-        </View>
-      </View>
-    </View>
-  );
-}
-
-function MapPin() {
-  return (
-    <View className="items-center">
-      <View
-        className="w-8 h-8 rounded-full bg-primary items-center justify-center"
-        style={{ shadowColor: '#1A5F4F', shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 }}
-      >
-        <Text style={{ fontSize: 14 }}>☕</Text>
-      </View>
-      <View
-        className="w-2 h-2 bg-primary rounded-full mt-0.5"
-        style={{ transform: [{ rotate: '45deg' }] }}
-      />
-    </View>
-  );
-}
-
-function ShopPin() {
-  return (
-    <View className="items-center">
-      <View
-        className="w-8 h-8 rounded-full bg-primary-light items-center justify-center"
-        style={{ shadowColor: '#2D7A67', shadowOpacity: 0.3, shadowRadius: 4, elevation: 3 }}
-      >
-        <Text style={{ fontSize: 14 }}>🏪</Text>
-      </View>
-    </View>
-  );
-}
-
-function RewardCard({
-  name,
-  points,
-  emoji,
-}: {
-  name: string;
-  points: number;
-  emoji: string;
-}) {
-  return (
-    <View
-      className="bg-white rounded-2xl p-4 mr-3 items-center"
-      style={{ width: 120, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 }}
-    >
-      <View className="w-14 h-14 rounded-2xl bg-cream items-center justify-center mb-2">
-        <Text style={{ fontSize: 28 }}>{emoji}</Text>
-      </View>
-      <Text className="text-text-dark font-semibold text-sm text-center" numberOfLines={2}>
-        {name}
-      </Text>
-      <Text className="text-primary font-bold text-sm mt-1">{points} pts</Text>
-    </View>
-  );
-}
-
-export default function EarnScreen() {
-  const router = useRouter();
-
-  return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
-        <View className="flex-row items-center justify-between px-5 pt-4 pb-3">
-          <Text className="text-2xl font-bold text-text-dark">
-            Hello, {MOCK_USER.name}!
-          </Text>
-
-          <TouchableOpacity onPress={() => {}} className="relative">
-            <View className="w-10 h-10 rounded-full bg-primary-pale items-center justify-center">
-              <Ionicons name="person-outline" size={20} color="#1A5F4F" />
-            </View>
-            <View className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-cream" />
-          </TouchableOpacity>
-        </View>
-
-        <View className="flex-row items-center px-5 mb-5">
-          <View className="flex-1 mr-4">
-            <StatBadge icon="💧" value={`${MOCK_USER.waterSavedLitres} L`} label="water saved" />
-            <StatBadge icon="♻️" value={`${MOCK_USER.wasteAvoidedKg} kg`} label="waste avoided" />
-            <StatBadge icon="☁️" value={`${MOCK_USER.co2PreventedKg} kg`} label="CO2 prevented" />
-          </View>
-
-          <View className="items-center">
-            <PointsRing points={MOCK_USER.cityRewardsBalance} />
-            <TouchableOpacity
-              onPress={() => router.push('/activity')}
-              className="flex-row items-center mt-3"
-            >
-              <Ionicons name="trending-up-outline" size={14} color="#1A5F4F" />
-              <Text className="text-primary text-sm font-semibold ml-1">Activity</Text>
-              <Ionicons name="chevron-forward" size={14} color="#1A5F4F" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View className="mb-4">
-          <View className="flex-row items-center justify-between px-5 mb-3">
-            <View className="flex-row items-center">
-              <Ionicons name="location-outline" size={16} color="#1A1A1A" />
-              <Text className="text-text-dark font-bold text-base ml-1">Places to earn nearby</Text>
-            </View>
-
-            <TouchableOpacity className="flex-row items-center">
-              <Text className="text-primary text-sm font-semibold">View all</Text>
-              <Ionicons name="chevron-forward" size={14} color="#1A5F4F" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 20, paddingRight: 8 }}
-          >
-            {MOCK_NEARBY_STORES.map((store) => (
-              <StoreCard
-                key={store.id}
-                store={store}
-                onPress={() => router.push(`/store/${store.id}`)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        <MapView />
-
-        <Text className="text-text-soft text-xs px-5 mt-2 mb-5 leading-4">
-          Discover places to earn City Rewards near you.{'\n'}(We are adding more places)
-        </Text>
-
-        <View className="mb-2">
-          <View className="flex-row items-center px-5 mb-3">
-            <Ionicons name="diamond-outline" size={16} color="#1A1A1A" />
-            <Text className="text-text-dark font-bold text-base ml-1">Ways to spend your points</Text>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 20, paddingRight: 8 }}
-          >
-            {MOCK_REWARDS.filter((r) => r.available).map((reward) => (
-              <RewardCard
-                key={reward.id}
-                name={reward.name}
-                points={reward.pointsCost}
-                emoji={reward.emoji}
-              />
-            ))}
-          </ScrollView>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+export const MOCK_REWARDS = [
+  {
+    id: 'reward_001',
+    name: 'Free Upsize',
+    pointsCost: 20,
+    description: 'Get a free size upgrade on any drink',
+    image: 'https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=400&q=80',
+    category: 'upgrade',
+    available: true,
+    emoji: '☕',
+  },
+  {
+    id: 'reward_002',
+    name: 'Oat Milk Upgrade',
+    pointsCost: 20,
+    description: 'Switch to oat milk at no extra charge',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80',
+    category: 'upgrade',
+    available: true,
+    emoji: '🥛',
+  },
+  {
+    id: 'reward_003',
+    name: 'Free Coffee',
+    pointsCost: 80,
+    description: 'A free drip coffee or espresso shot',
+    image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80',
+    category: 'free_drink',
+    available: true,
+    emoji: '🎁',
+  },
+  {
+    id: 'reward_004',
+    name: 'Free Pastry',
+    pointsCost: 100,
+    description: 'Choose any pastry from the display',
+    image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80',
+    category: 'food',
+    available: true,
+    emoji: '🥐',
+  },
+  {
+    id: 'reward_005',
+    name: 'Plant a Tree',
+    pointsCost: 50,
+    description: "We'll plant a tree in your name",
+    image: 'https://images.unsplash.com/photo-1542601906897-a4ca48cd9a63?w=400&q=80',
+    category: 'impact',
+    available: true,
+    emoji: '🌳',
+  },
+  {
+    id: 'reward_006',
+    name: '$5 Off Order',
+    pointsCost: 150,
+    description: '$5 discount on your next order',
+    image: null,
+    category: 'discount',
+    available: false,
+    emoji: '💰',
+  },
+];
