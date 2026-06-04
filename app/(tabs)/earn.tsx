@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { MOCK_USER, MOCK_NEARBY_STORES, MOCK_REWARDS } from '../../constants/mockData';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -20,13 +20,12 @@ function PointsRing({ points, size = 130 }: { points: number; size?: number }) {
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(points / 200, 1); // max 200 for full ring
+  const progress = Math.min(points / 200, 1);
   const strokeDashoffset = circumference - progress * circumference;
 
   return (
     <View style={{ width: size, height: size, position: 'relative' }}>
       <Svg width={size} height={size}>
-        {/* Background track */}
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -35,7 +34,6 @@ function PointsRing({ points, size = 130 }: { points: number; size?: number }) {
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Progress arc */}
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -97,13 +95,11 @@ function StoreCard({ store, onPress }: { store: typeof MOCK_NEARBY_STORES[0]; on
           className="w-full h-full"
           resizeMode="cover"
         />
-        {/* Coffee cup badge */}
         <View className="absolute top-2 right-2 bg-white w-7 h-7 rounded-full items-center justify-center"
           style={{ shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 4, elevation: 2 }}
         >
           <Text style={{ fontSize: 14 }}>☕</Text>
         </View>
-        {/* Closed overlay */}
         {!store.isOpen && (
           <View className="absolute inset-0 bg-black/40 items-center justify-center">
             <Text className="text-white text-xs font-semibold">Closed</Text>
@@ -121,67 +117,102 @@ function StoreCard({ store, onPress }: { store: typeof MOCK_NEARBY_STORES[0]; on
   );
 }
 
-// Simplified map view
-function MapView() {
-  const mapStores = MOCK_NEARBY_STORES.slice(0, 3);
-  return (
-    <View
-      className="mx-4 rounded-2xl overflow-hidden"
-      style={{ height: 160, backgroundColor: '#E8EFE8' }}
-    >
-      <Image
-        source={{ uri: 'https://api.mapbox.com/styles/v1/mapbox/light-v11/static/-79.3832,43.6532,13,0/400x320?access_token=pk.dummy' }}
-        className="w-full h-full"
-        resizeMode="cover"
-      />
-      {/* Fallback map background with pins */}
-      <View className="absolute inset-0 bg-green-50/80 items-center justify-center">
-        {/* Simple map grid lines */}
-        <View className="absolute inset-0" style={{ opacity: 0.3 }}>
-          {[0.3, 0.5, 0.7].map((pos) => (
-            <View key={pos} className="absolute left-0 right-0 h-px bg-gray-400"
-              style={{ top: `${pos * 100}%` }} />
-          ))}
-          {[0.25, 0.5, 0.75].map((pos) => (
-            <View key={pos} className="absolute top-0 bottom-0 w-px bg-gray-400"
-              style={{ left: `${pos * 100}%` }} />
-          ))}
-        </View>
-        {/* Map pins */}
-        <View className="absolute" style={{ top: '30%', left: '30%' }}>
-          <MapPin />
-        </View>
-        <View className="absolute" style={{ top: '55%', left: '55%' }}>
-          <MapPin />
-        </View>
-        <View className="absolute" style={{ top: '40%', left: '68%' }}>
-          <ShopPin />
-        </View>
-      </View>
-    </View>
-  );
-}
-
 function MapPin() {
   return (
-    <View className="items-center">
-      <View className="w-8 h-8 rounded-full bg-primary items-center justify-center"
-        style={{ shadowColor: '#1A5F4F', shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 }}
-      >
+    <View style={{ alignItems: 'center' }}>
+      <View style={{
+        width: 32, height: 32, borderRadius: 16, backgroundColor: '#1A5F4F',
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: '#1A5F4F', shadowOpacity: 0.4, shadowRadius: 6, elevation: 4,
+      }}>
         <Text style={{ fontSize: 14 }}>☕</Text>
       </View>
-      <View className="w-2 h-2 bg-primary rounded-full mt-0.5" style={{ transform: [{ rotate: '45deg' }] }} />
+      <View style={{
+        width: 8, height: 8, backgroundColor: '#1A5F4F', borderRadius: 4,
+        marginTop: 2, transform: [{ rotate: '45deg' }],
+      }} />
     </View>
   );
 }
 
 function ShopPin() {
   return (
-    <View className="items-center">
-      <View className="w-8 h-8 rounded-full bg-primary-light items-center justify-center"
-        style={{ shadowColor: '#2D7A67', shadowOpacity: 0.3, shadowRadius: 4, elevation: 3 }}
-      >
+    <View style={{ alignItems: 'center' }}>
+      <View style={{
+        width: 32, height: 32, borderRadius: 16, backgroundColor: '#2D7A67',
+        alignItems: 'center', justifyContent: 'center',
+        shadowColor: '#2D7A67', shadowOpacity: 0.3, shadowRadius: 4, elevation: 3,
+      }}>
         <Text style={{ fontSize: 14 }}>🏪</Text>
+      </View>
+    </View>
+  );
+}
+
+function MapView() {
+  const mapHeight = 160;
+  const mapWidth = SCREEN_WIDTH - 32; // mx-4 = 16px each side
+
+  const horizontalLines = [
+    { key: 'h1', top: mapHeight * 0.3 },
+    { key: 'h2', top: mapHeight * 0.5 },
+    { key: 'h3', top: mapHeight * 0.7 },
+  ];
+  const verticalLines = [
+    { key: 'v1', left: mapWidth * 0.25 },
+    { key: 'v2', left: mapWidth * 0.5 },
+    { key: 'v3', left: mapWidth * 0.75 },
+  ];
+
+  return (
+    <View
+      style={{
+        marginHorizontal: 16,
+        borderRadius: 16,
+        overflow: 'hidden',
+        height: mapHeight,
+        backgroundColor: '#E8EFE8',
+      }}
+    >
+      {/* Grid lines */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.3 }}>
+        {horizontalLines.map((line) => (
+          <View
+            key={line.key}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              height: 1,
+              backgroundColor: '#9CA3AF',
+              top: line.top,
+            }}
+          />
+        ))}
+        {verticalLines.map((line) => (
+          <View
+            key={line.key}
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: 1,
+              backgroundColor: '#9CA3AF',
+              left: line.left,
+            }}
+          />
+        ))}
+      </View>
+
+      {/* Map pins using absolute pixel positions */}
+      <View style={{ position: 'absolute', top: mapHeight * 0.3, left: mapWidth * 0.3 }}>
+        <MapPin />
+      </View>
+      <View style={{ position: 'absolute', top: mapHeight * 0.55, left: mapWidth * 0.55 }}>
+        <MapPin />
+      </View>
+      <View style={{ position: 'absolute', top: mapHeight * 0.4, left: mapWidth * 0.68 }}>
+        <ShopPin />
       </View>
     </View>
   );
@@ -215,31 +246,23 @@ export default function EarnScreen() {
           <Text className="text-2xl font-bold text-text-dark">
             Hello, {MOCK_USER.name}!
           </Text>
-          <TouchableOpacity
-            onPress={() => {}}
-            className="relative"
-          >
+          <TouchableOpacity onPress={() => {}} className="relative">
             <View className="w-10 h-10 rounded-full bg-primary-pale items-center justify-center">
               <Ionicons name="person-outline" size={20} color="#1A5F4F" />
             </View>
-            {/* Online indicator */}
             <View className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-cream" />
           </TouchableOpacity>
         </View>
 
         {/* Stats + Points ring row */}
         <View className="flex-row items-center px-5 mb-5">
-          {/* Stats column */}
           <View className="flex-1 mr-4">
             <StatBadge icon="💧" value={`${MOCK_USER.waterSavedLitres} L`} label="water saved" />
             <StatBadge icon="♻️" value={`${MOCK_USER.wasteAvoidedKg} kg`} label="waste avoided" />
             <StatBadge icon="☁️" value={`${MOCK_USER.co2PreventedKg} kg`} label="CO2 prevented" />
           </View>
-
-          {/* Points ring */}
           <View className="items-center">
             <PointsRing points={MOCK_USER.cityRewardsBalance} />
-            {/* Activity button */}
             <TouchableOpacity
               onPress={() => router.push('/activity')}
               className="flex-row items-center mt-3"
@@ -263,7 +286,6 @@ export default function EarnScreen() {
               <Ionicons name="chevron-forward" size={14} color="#1A5F4F" />
             </TouchableOpacity>
           </View>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -291,7 +313,6 @@ export default function EarnScreen() {
             <Ionicons name="diamond-outline" size={16} color="#1A1A1A" />
             <Text className="text-text-dark font-bold text-base ml-1">Ways to spend your points</Text>
           </View>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
