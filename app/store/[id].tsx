@@ -1,89 +1,85 @@
 import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { MOCK_NEARBY_STORES } from '../../constants/mockData';
 
 export default function StoreDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
 
-  const store = MOCK_NEARBY_STORES.find((s) => s.id === id) ?? MOCK_NEARBY_STORES[0];
+  const store = MOCK_NEARBY_STORES.find((s) => s.id === id);
+
+  if (!store) {
+    return (
+      <SafeAreaView className="flex-1 bg-cream items-center justify-center">
+        <Text className="text-text-dark text-base font-semibold">Store not found</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const heroImageSource =
+    typeof store.image === 'string' &&
+    store.image.trim().length > 0 &&
+    store.image.startsWith('http')
+      ? { uri: store.image }
+      : { uri: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80' };
 
   return (
-    <SafeAreaView className="flex-1 bg-cream" edges={['bottom']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Hero image */}
-        <View style={{ height: 220 }}>
-        <Image 
-source={
-  typeof store.image === 'string' && store.image.length > 0 
-    ? [{ uri: store.image }] 
-    : [{ uri: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1000' }]
-}
-  className="w-full h-full" 
-  resizeMode="cover" 
-/>
-<View className="absolute inset-0 bg-black/20" />
-          {/* Open badge */}
-          <View className={`absolute top-4 right-4 px-3 py-1 rounded-full ${store.isOpen ? 'bg-green-500' : 'bg-gray-500'}`}>
-            <Text className="text-white text-xs font-semibold">
-              {store.isOpen ? `Open · until ${store.openUntil}` : 'Closed'}
+    <SafeAreaView className="flex-1 bg-cream">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View className="relative">
+          <View className="w-full h-64 bg-gray-200">
+            <Image
+              source={heroImageSource}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white items-center justify-center"
+            style={{ shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, elevation: 3 }}
+          >
+            <Ionicons name="chevron-back" size={22} color="#1A1A1A" />
+          </TouchableOpacity>
+        </View>
+
+        <View className="px-5 py-5">
+          <Text className="text-2xl font-bold text-text-dark">{store.name}</Text>
+
+          <View className="flex-row items-center mt-2">
+            <Ionicons name="location-outline" size={16} color="#888880" />
+            <Text className="text-text-soft ml-1">{store.address}</Text>
+          </View>
+
+          <View className="flex-row items-center mt-2">
+            <Ionicons name="walk-outline" size={16} color="#888880" />
+            <Text className="text-text-soft ml-1">{store.distance} away</Text>
+          </View>
+
+          <View className="flex-row items-center mt-2">
+            <Ionicons
+              name={store.isOpen ? 'time-outline' : 'close-circle-outline'}
+              size={16}
+              color={store.isOpen ? '#1A5F4F' : '#B45309'}
+            />
+            <Text
+              className="ml-1 font-medium"
+              style={{ color: store.isOpen ? '#1A5F4F' : '#B45309' }}
+            >
+              {store.isOpen ? `Open until ${store.openUntil}` : 'Currently closed'}
             </Text>
           </View>
-        </View>
 
-        {/* Info card */}
-        <View className="mx-4 -mt-6 bg-white rounded-2xl p-5"
-          style={{ shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 }}
-        >
-          <Text className="text-2xl font-bold text-text-dark mb-1">{store.name}</Text>
-          <View className="flex-row items-center">
-            <Ionicons name="location-outline" size={14} color="#888880" />
-            <Text className="text-text-soft text-sm ml-1">{store.address} · {store.distance}</Text>
+          <View className="bg-white rounded-2xl p-4 mt-5">
+            <Text className="text-text-dark font-semibold text-base">Rewards</Text>
+            <Text className="text-text-soft mt-1">
+              Earn {store.pointsPerVisit} City Rewards points when you bring your own cup.
+            </Text>
           </View>
-
-          <View className="flex-row mt-4 gap-3">
-            <View className="flex-1 bg-cream rounded-xl p-3 items-center">
-              <Text className="text-primary font-bold text-lg">+{store.pointsPerVisit}</Text>
-              <Text className="text-text-soft text-xs mt-0.5">pts per visit</Text>
-            </View>
-            <View className="flex-1 bg-cream rounded-xl p-3 items-center">
-              <Text className="text-text-dark font-bold text-lg">☕</Text>
-              <Text className="text-text-soft text-xs mt-0.5">Reusable cup</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* How to earn */}
-        <View className="mx-4 mt-4 bg-white rounded-2xl p-5"
-          style={{ shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, elevation: 2 }}
-        >
-          <Text className="font-bold text-base text-text-dark mb-3">How to earn points</Text>
-          {[
-            { icon: 'cafe-outline', text: 'Bring your reusable cup' },
-            { icon: 'qr-code-outline', text: 'Scan the QR code at the counter' },
-            { icon: 'checkmark-circle-outline', text: `Earn +${store.pointsPerVisit} City Rewards instantly` },
-          ].map((step, i) => (
-            <View key={i} className="flex-row items-center mb-3">
-              <View className="w-9 h-9 rounded-full bg-primary-pale items-center justify-center mr-3">
-                <Ionicons name={step.icon as any} size={18} color="#1A5F4F" />
-              </View>
-              <Text className="text-text-mid text-sm flex-1">{step.text}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Scan CTA */}
-        <View className="mx-4 mt-4">
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/scan')}
-            className="bg-primary rounded-xl py-4 items-center"
-            activeOpacity={0.85}
-          >
-            <Text className="text-white font-semibold text-base">Scan QR Code Here</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
